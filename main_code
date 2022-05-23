@@ -1,0 +1,239 @@
+import time
+import random
+import datetime
+import math
+import os
+import json
+import discord
+from discord.ext import commands
+from discord.ext.commands import cooldown, BucketType
+from discord import permissions
+from keep_alive import keep_alive
+
+client = commands.Bot(command_prefix = ".")
+client.remove_command("help")
+
+@client.event
+async def on_ready():
+	print("We have logged in as {0.user}.".format(client))
+	print(f"Running.")
+
+@client.event
+async def on_message(message):
+	if message.author == client.user:
+		return
+	if message.author.bot: return
+	await client.process_commands(message)
+
+@client.command()
+async def t(ctx, name=None, name_for_edit=None, *, tag_edit_content=None):
+	author = ctx.message.author
+	authorid = ctx.message.author.id
+	if name == None:
+		await ctx.channel.send("Please specify a name for the random tag")
+	elif name == "create":
+		if name_for_edit == "delete" or name_for_edit == "create" or name_for_edit == "edit" or name_for_edit == "steffify" or name_for_edit == "list":
+			await ctx.channel.send("You cannot create a tag with that name.")
+		else:
+			if os.path.exists(f"{name_for_edit}.txt") == True:
+				await ctx.channel.send(f"This tag already exists. Use .t edit {name_for_edit} to add content.")
+			elif os.path.exists(f"{name_for_edit}.txt") == False:
+				await ctx.message.attachments[0].save(f"{name_for_edit}.txt")
+				await ctx.channel.send(f"File saved as {name_for_edit}.txt - you can now call on this random choice tag using `.t {name_for_edit}`!")
+				f = open(f"{name_for_edit}_credits.txt", "w")
+				f.write(f"""{authorid}
+{author}
+private""")
+			else:
+				await ctx.channel.send("An unexpected error occured. Error Type: Finding existing file checks.")
+	elif name == "delete":
+		authorid = ctx.message.author.id
+		linelist = open(f"{name_for_edit}_credits.txt").read().splitlines()
+		tagauthor = linelist[0]
+		pubcheck = linelist[2]
+		authorid = str(authorid)
+		tagauthor = str(tagauthor)
+		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
+		author = ctx.message.author
+		if name_for_edit == "rsleep":
+			await ctx.channel.send("This tag was manually added, and as such cannot be deleted.")
+		elif tagauthor == authorid:
+			os.remove(f"{name_for_edit}.txt")
+			os.remove(f"{name_for_edit}_credits.txt")
+			await ctx.channel.send(f"Tag {name_for_edit} deleted!")
+		elif role in author.roles:
+			os.remove(f"{name_for_edit}.txt")
+			os.remove(f"{name_for_edit}_credits.txt")
+			await ctx.channel.send(f"Tag {name_for_edit} deleted!")
+		elif pubcheck == "open":
+			os.remove(f"{name_for_edit}.txt")
+			os.remove(f"{name_for_edit}_credits.txt")
+			await ctx.channel.send(f"Tag {name_for_edit} deleted!")
+		else:
+			await ctx.channel.send("You do not own this tag, and it is not set to open, therefore you cannot delete it.")
+	elif name == "list":
+		file = discord.File(f"{name_for_edit}.txt")
+		authorlinelist = open(f"{name_for_edit}_credits.txt").read().splitlines()
+		authorname = authorlinelist[1]
+		await ctx.channel.send(file=file, content=f"Tag {name_for_edit}.")
+	elif name == "edit":
+		authorid = ctx.message.author.id
+		authorid = str(authorid)
+		if name_for_edit != "public" and name_for_edit != "private" and name_for_edit != "open":
+			linelist = open(f"{name_for_edit}_credits.txt").read().splitlines()
+			tagauthor = linelist[0]
+			tagauthor = str(tagauthor)
+			pubchecker = linelist[2]
+		else:
+			linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
+			tagauthor = linelist[0]
+			tagauthor = str(tagauthor)
+			pubchecker = linelist[2]
+		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
+		author = ctx.message.author
+		if name_for_edit == "public":
+			if tag_edit_content == "rsleep":
+				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
+			elif tagauthor == authorid or role in author.roles:
+				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
+				tag_pub_check = linelist[2]
+				if tag_pub_check == "public":
+					await ctx.channel.send("This tag is already public.")
+				else:
+					f = open(f"{tag_edit_content}_credits.txt", "w")
+					for i in linelist:
+						if i != "private" and i != "open":
+							f.write(f"{i} \n")
+					f.write("public")
+					f.close()
+					await ctx.channel.send("This tag is now public!")
+			else:
+				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")				
+		elif name_for_edit == "private":
+			if tag_edit_content == "rsleep":
+				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
+			elif tagauthor == authorid or role in author.roles:
+				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
+				tag_pub_check = linelist[2]
+				if tag_pub_check == "private":
+					await ctx.channel.send("This tag is already private.")
+				else:
+					f = open(f"{tag_edit_content}_credits.txt", "w")
+					for i in linelist:
+						if i != "public" and i != "open":
+							f.write(f"{i} \n")
+					f.write("private")
+					f.close()
+					await ctx.channel.send("This tag is now private!")
+			else:
+				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")
+		elif name_for_edit == "open":
+			if tag_edit_content == "rsleep":
+				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
+			elif tagauthor == authorid or role in author.roles:
+				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
+				tag_pub_check = linelist[2]
+				if tag_pub_check == "open":
+					await ctx.channel.send("This tag is already open.")
+				else:
+					f = open(f"{tag_edit_content}_credits.txt", "w")
+					for i in linelist:
+						if i != "private" and i != "public":
+							f.write(f"{i} \n")
+					f.write("open")
+					f.close()
+					await ctx.channel.send("This tag is now open!")
+			else:
+				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")
+		elif name_for_edit == "rsleep":
+			if name_for_edit == None:
+				await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+			elif tag_edit_content == None:
+				await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
+			else:
+				authorname = ctx.message.author
+				f = open(f"rsleep.txt", "a")
+				f.write(f"\n {tag_edit_content}")
+				f.close()
+				f = open(f"rsleep_credits.txt", "a")
+				f.write(f"\n {authorname}")
+				await ctx.channel.send(f"Tag content edited! Call the tag using `.rt {name_for_edit}`.")
+
+		elif pubchecker == "private":
+			if tagauthor == authorid:
+				if name_for_edit == None:
+					await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+				elif tag_edit_content == None:
+					await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
+				else:
+					f = open(f"{name_for_edit}.txt", "a")
+					f.write(f"\n {tag_edit_content}")
+					f.close()
+					await ctx.channel.send(f"Tag content edited! Call the tag using `.rt {name_for_edit}`.")
+			elif role in author.roles:
+				if name_for_edit == None:
+					await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+				elif tag_edit_content == None:
+					await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
+				else:
+					f = open(f"{name_for_edit}.txt", "a")
+					f.write(f"\n {tag_edit_content}")
+					f.close()
+					await ctx.channel.send(f"Tag content edited! Call the tag using `.rt {name_for_edit}`.")
+			else:
+				await ctx.channel.send("You are not the owner of this tag, and therefore cannot edit it.")
+		elif pubchecker == "public" or pubchecker == "open":
+			if name_for_edit == None:
+				await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+			elif tag_edit_content == None:
+				await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
+			else:
+				f = open(f"{name_for_edit}.txt", "a")
+				f.write(f"\n {tag_edit_content}")
+				f.close()
+				await ctx.channel.send(f"Tag content edited! Call the tag using `.rt {name_for_edit}`.")
+	elif name == "steffify":
+		await ctx.channel.send("That's a command! Use `.steffify` to call this command!")
+	else:
+		linelist = open(f"{name}.txt").read().splitlines()
+		lineselector = len(linelist)
+		rtag_line_number = random.randint(1, lineselector)
+		rtag_line_number = rtag_line_number - 1
+		rtag_response = linelist[rtag_line_number]
+		authorcreditlist = open(f"{name}_credits.txt").read().splitlines()
+		authorcredit_response = authorcreditlist[1]
+		await ctx.channel.send(f"Tag: {name} | Item No. {rtag_line_number} | Author: {authorcredit_response} \n {rtag_response}")
+
+@client.command()
+async def steffify(ctx, *, messagecontent):
+	def seperate(word):
+		return [char for char in word]
+	messagecontent = str(messagecontent)
+	messagecontent = messagecontent.lower()
+	word = messagecontent
+	returnmessage = ""
+	secondmessage = ""
+	characterlist = seperate(word)
+	for i in characterlist:
+		if i == " ":
+			i = " <:blank_tile:977218604347035678>"
+			returnmessage = returnmessage + f" {i}"
+			secondmessage = secondmessage + f" {i}"
+		elif i in letter_list:
+			i = f":regional_indicator_{i}:"
+			returnmessage = returnmessage + f" {i}"
+			secondmessage = secondmessage + " <:Steffi_wow:695122476795166780>"
+	await ctx.channel.send(f"{returnmessage} \n {secondmessage}")
+
+@client.command()
+async def help(ctx):
+	embed=discord.Embed(title="Help Page:Sleepless Domain RTag Bot", color=0x00FFE0)
+	embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add content to the tag, upload a text file with the different responses in it, with each response on a different line.", inline=False)
+	embed.add_field(name=".t edit [name] [content]", value="Allows you to add content to an already existing tag. You can only do this if the tag has been set to public by the owner of the tag, or by a mod. Type the response you would like to add (only one new response at a time can be added).", inline=False)
+	embed.add_field(name=".t edit [private / public / open]", value="Allows you to set a tag to public, private, or open, if you are the owner of the tag or a mod. Public tags can be edited by everyone, and private tags can only be edited by the creator and mods. Open tags can be edited by anyone and also deleted by anyone. Regardless of tag permissions, only the tags owner and mods can change the permissions of a tag.", inline=False)
+	embed.add_field(name=".t delete [name]", value="Allows you to delete a tag. If you are not the owner, or a mod, then this command will not work unless the tag permissions are set to open.", inline=False)
+	embed.add_field(name=".t list [name]", value="Lists all the responses to a tag. This command also lists the creator of the tag.", inline=False)
+	await ctx.channel.send(embed=embed)
+
+keep_alive()
+client.run(os.getenv("TOKEN"))
