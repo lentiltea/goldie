@@ -5,6 +5,7 @@ import math
 import os
 import json
 import discord
+import asyncio
 from discord.ext import commands
 from discord.ext.commands import cooldown, BucketType
 from discord import permissions
@@ -12,16 +13,41 @@ from discord import permissions
 client = commands.Bot(command_prefix = ".")
 client.remove_command("help")
 
+#README
+#REMEMBER WHEN ADDING NEW COMMANDS TO DO THE FOLLOWING
+#Add command name to banned_tag_names if applicable
+#Remember to add to the help directory: there's one in .t and one in .help. EDIT BOTH
+
+rtagwithcreditslist = ["rsleep", "nicesleep"]
+banned_tag_names = ["delete", "create", "add", "steffify", "list", "help", "append", "rewrite", "edit", "eval", "ocprompt", "emote"]
+
+async def melty_task():
+	while True:
+		clientguild = client.get_guild(400952239918678026)
+		role = discord.utils.find(lambda r: r.name == "Team Melty", clientguild.roles)
+		timestamp_indic = datetime.datetime.now()
+		timestamp_indic = timestamp_indic.strftime("%d")
+		timestamp_indic = int(timestamp_indic)
+		if ( timestamp_indic % 2 ) == 0:
+			await role.edit(color=0xED674C)
+			print("ROLE MELTIES EDITED: COLOUR MELTY FLAME ASSIGNED")
+		else:
+			await role.edit(color=0x92CBE6)
+			print("ROLE MELTIES EDITED: COLOUR MELTY FROST ASSIGNED")
+		await asyncio.sleep(300)
+
 @client.event
 async def on_ready():
 	print("We have logged in as {0.user}.".format(client))
 	print(f"Running.")
+	client.loop.create_task(melty_task())
 
 @client.event
 async def on_message(message):
 	if message.author == client.user:
 		return
 	if message.author.bot: return
+	message.content = message.content.lower()
 	await client.process_commands(message)
 
 @client.command()
@@ -31,7 +57,7 @@ async def t(ctx, name=None, name_for_edit=None, *, tag_edit_content=None):
 	if name == None:
 		await ctx.channel.send("Please specify a name for the random tag")
 	elif name == "create":
-		if name_for_edit == "delete" or name_for_edit == "create" or name_for_edit == "edit" or name_for_edit == "steffify" or name_for_edit == "list":
+		if name_for_edit in banned_tag_names:
 			await ctx.channel.send("You cannot create a tag with that name.")
 		else:
 			if os.path.exists(f"{name_for_edit}.txt") == True:
@@ -57,7 +83,7 @@ private""")
 		tagauthor = str(tagauthor)
 		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
 		author = ctx.message.author
-		if name_for_edit == "rsleep":
+		if name_for_edit == rtagwithcreditslist:
 			await ctx.channel.send("This tag was manually added, and as such cannot be deleted.")
 		elif tagauthor == authorid:
 			os.remove(f"{name_for_edit}.txt")
@@ -65,8 +91,12 @@ private""")
 			await ctx.channel.send(f"Tag {name_for_edit} deleted!")
 			taglinelist = open("alltags.txt").read().splitlines()
 			f = open("alltags.txt", "w")
+			f.write(" ")
+			f.close()
+			name_for_edit = str(name_for_edit)
+			f = open("alltags.txt", "a")
 			for i in taglinelist:
-				if i != f"{name_for_edit}":
+				if i != name_for_edit:
 					f.write(f"{i} \n")
 			f.close()
 		elif role in author.roles:
@@ -110,7 +140,7 @@ private""")
 		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
 		author = ctx.message.author
 		if name_for_edit == "public":
-			if tag_edit_content == "rsleep":
+			if tag_edit_content == rtagwithcreditslist:
 				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
 			elif tagauthor == authorid or role in author.roles:
 				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
@@ -128,7 +158,7 @@ private""")
 			else:
 				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")				
 		elif name_for_edit == "private":
-			if tag_edit_content == "rsleep":
+			if tag_edit_content in rtagwithcreditslist:
 				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
 			elif tagauthor == authorid or role in author.roles:
 				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
@@ -146,7 +176,7 @@ private""")
 			else:
 				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")
 		elif name_for_edit == "open":
-			if tag_edit_content == "rsleep":
+			if tag_edit_content in rtagwithcreditslist:
 				await ctx.channel.send("This tag is manually set to be public. As such, the status of the tag cannot be changed.")
 			elif tagauthor == authorid or role in author.roles:
 				linelist = open(f"{tag_edit_content}_credits.txt").read().splitlines()
@@ -163,7 +193,7 @@ private""")
 					await ctx.channel.send("This tag is now open!")
 			else:
 				await ctx.channel.send("Only the owner of this tag / mods can edit the tags status.")
-		elif name_for_edit == "rsleep":
+		elif name_for_edit in rtagwithcreditslist:
 			if name_for_edit == None:
 				await ctx.channel.send("Please specify the name of the tag you wish to edit.")
 			elif tag_edit_content == None:
@@ -181,14 +211,22 @@ private""")
 			if tagauthor == authorid:
 				if name_for_edit == None:
 					await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+				elif tag_edit_content == None:
+					await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
 				else:
-					await ctx.message.attachments[0].save(f"{name_for_edit}.txt")
+					f = open(f"{name_for_edit}.txt", "a")
+					f.write(f"\n {tag_edit_content}")
+					f.close()
 					await ctx.channel.send(f"Tag edited! Use .t {name_for_edit} to use this tag!")
 			elif role in author.roles:
 				if name_for_edit == None:
 					await ctx.channel.send("Please specify the name of the tag you wish to edit.")
+				elif tag_edit_content == None:
+					await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
 				else:
-					await ctx.message.attachments[0].save(f"{name_for_edit}.txt")
+					f = open(f"{name_for_edit}.txt", "a")
+					f.write(f"\n {tag_edit_content}")
+					f.close()
 					await ctx.channel.send(f"Tag edited! Use .t {name_for_edit} to use this tag!")
 			else:
 				await ctx.channel.send("You are not the owner of this tag, and therefore cannot edit it.")
@@ -198,19 +236,134 @@ private""")
 			elif tag_edit_content == None:
 				await ctx.channel.send("Please try again, remembering to enter the content to be added to the tag.")
 			else:
-					await ctx.message.attachments[0].save(f"{name_for_edit}.txt")
+					f = open(f"{name_for_edit}.txt", "a")
+					f.write(f"\n {tag_edit_content}")
+					f.close()
 					await ctx.channel.send(f"Tag edited! Use .t {name_for_edit} to use this tag!")
+	elif name == "add":
+		authorid = ctx.message.author.id
+		authorid = str(authorid)
+		linelist = open(f"{name_for_edit}_credits.txt").read().splitlines()
+		tagauthor = linelist[0]
+		tagauthor = str(tagauthor)
+		pubchecker = linelist[2]
+		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
+		author = ctx.message.author
+		if pubchecker == "private":
+			if authorid == tagauthor:
+				await ctx.message.attachments[0].save(f"{name_for_edit}_temp_append.txt")
+				linecopy = open(f"{name_for_edit}_temp_append.txt").read().splitlines()
+				f = open(f"{name_for_edit}.txt", "a")
+				for i in linecopy:
+					f.write(f"\n {i}")
+				f.close()
+				os.remove(f"{name_for_edit}_temp_append.txt")
+				await ctx.channel.send(f"Successfully added content to tag! Use `.t {name_for_edit}` to call the tag!")
+			else:
+				await ctx.channel.send("This tag is private. Only the owner of the tag, or a moderator, can edit the tag.")
+		elif pubchecker == "public" or pubchecker == "open":
+			if os.path.exists(f"{name_for_edit}.txt") == False:
+				await ctx.channel.send("This tag doesn't exist. Please use the `.t create` command to create this tag.")
+			elif os.path.exists(f"{name_for_edit}.txt") == True:
+				await ctx.message.attachments[0].save(f"{name_for_edit}_temp_append.txt")
+				linecopy = open(f"{name_for_edit}_temp_append.txt").read().splitlines()
+				f = open(f"{name_for_edit}.txt", "a")
+				for i in linecopy:
+					f.write(f"\n {i}")
+				f.close()
+				await ctx.channel.send(f"Successfully added content to tag! Use `.t {name_for_edit}` to call the tag!")
+		else:
+			await ctx.channel.send("An unexpected error occured. Please alert LentilTea#4801 so they can check for the cause of the error. Error source: `Add code; tag state checker`.")
+	elif name == "rewrite":
+		authorid = ctx.message.author.id
+		authorid = str(authorid)
+		linelist = open(f"{name_for_edit}_credits.txt").read().splitlines()
+		tagauthor = linelist[0]
+		tagauthor = str(tagauthor)
+		pubchecker = linelist[2]
+		role = discord.utils.find(lambda r: r.name == "Admin", ctx.message.guild.roles)
+		author = ctx.message.author
+		if pubchecker == "private" or pubchecker == "public":
+			if authorid == tagauthor:
+				await ctx.message.attachments[0].save(f"{name_for_edit}_temp_append.txt")
+				linecopy = open(f"{name_for_edit}_temp_append.txt").read().splitlines()
+				f = open(f"{name_for_edit}.txt", "w")
+				for i in linecopy:
+					f.write(f"\n {i}")
+				f.close()
+				os.remove(f"{name_for_edit}_temp_append.txt")
+				await ctx.channel.send(f"Successfully added content to tag! Use `.t {name_for_edit}` to call the tag!")
+			else:
+				await ctx.channel.send("This tag is not set to open. Only the owner of the tag, or a moderator, can rewrite the tag.")
+		elif pubchecker == "open":
+			if os.path.exists(f"{name_for_edit}.txt") == False:
+				await ctx.channel.send("This tag doesn't exist. Please use the `.t create` command to create this tag.")
+			elif os.path.exists(f"{name_for_edit}.txt") == True:
+				await ctx.message.attachments[0].save(f"{name_for_edit}_temp_append.txt")
+				linecopy = open(f"{name_for_edit}_temp_append.txt").read().splitlines()
+				f = open(f"{name_for_edit}.txt", "w")
+				for i in linecopy:
+					f.write(f"\n {i}")
+				f.close()
+				await ctx.channel.send(f"Successfully added content to tag! Use `.t {name_for_edit}` to call the tag!")
+		else:
+			await ctx.channel.send("An unexpected error occured. Please alert LentilTea#4801 so they can check for the cause of the error. Error source: `Rewrite code; tag state checker`.")
 	elif name == "steffify":
 		await ctx.channel.send("That's a command! Use `.steffify` to call this command!")
-	else:
+	elif name == "ocprompt":
+		await ctx.channel.send("That's a command! Use `.ocprompt` to call this command!")
+	elif name == "emote":
+		await ctx.channel.send("That's a command! Use `.emote` to call this command!")
+	elif name in rtagwithcreditslist:
 		linelist = open(f"{name}.txt").read().splitlines()
 		lineselector = len(linelist)
 		rtag_line_number = random.randint(1, lineselector)
 		rtag_line_number = rtag_line_number - 1
 		rtag_response = linelist[rtag_line_number]
+		authorlist = open(f"{name}_credits.txt").read().splitlines()
+		rtag_author_number = authorlist[rtag_line_number]
 		authorcreditlist = open(f"{name}_credits.txt").read().splitlines()
 		authorcredit_response = authorcreditlist[1]
-		await ctx.channel.send(f"Tag: {name} | Item No. {rtag_line_number} | Author: {authorcredit_response} \n {rtag_response}")
+		await ctx.channel.send(f"{rtag_author_number} \n {rtag_response}")
+	elif name == "rsneep":
+		linelist = open("rsleep.txt").read().splitlines()
+		lineselector = len(linelist)
+		rtag_line_number = random.randint(1, lineselector)
+		rtag_line_number = rtag_line_number - 1
+		rtag_response = linelist[rtag_line_number]
+		authorlist = open("rsleep_credits.txt").read().splitlines()
+		rtag_author_number = authorlist[rtag_line_number]
+		authorcreditlist = open("rsleep_credits.txt").read().splitlines()
+		authorcredit_response = authorcreditlist[1]
+		await ctx.channel.send(f"{rtag_author_number} \n {rtag_response}")
+	elif name == "help":
+		embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+		embed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+		embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+		embed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+		embed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+		embed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+		embed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+		embed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+		embed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+		embed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+		embed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+		embed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+		embed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+		embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+		await ctx.channel.send(embed=embed)
+	else:
+		if os.path.exists(f"{name}.txt") == True:
+			linelist = open(f"{name}.txt").read().splitlines()
+			lineselector = len(linelist)
+			rtag_line_number = random.randint(1, lineselector)
+			rtag_line_number = rtag_line_number - 1
+			rtag_response = linelist[rtag_line_number]
+			authorcreditlist = open(f"{name}_credits.txt").read().splitlines()
+			authorcredit_response = authorcreditlist[1]
+			await ctx.channel.send(f"{rtag_response}")
+		elif os.path.exists(f"{name}.txt") == False:
+			await ctx.channel.send("Tag not found.")
 
 @client.command()
 async def steffify(ctx, *, messagecontent):
@@ -240,18 +393,151 @@ async def taglist(ctx):
 	messageresponse = ""
 	for i in taglistcount:
 		messageresponse = messageresponse + f"{i}, "
-	await ctx.channel.send(messageresponse)
+	await ctx.channel.send(f"All tags: \n {messageresponse}")
 
 @client.command()
 async def help(ctx):
-	embed=discord.Embed(title="Help Page:Sleepless Domain RTag Bot", color=0x00FFE0)
-	embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add content to the tag, upload a text file with the different responses in it, with each response on a different line.", inline=False)
-	embed.add_field(name=".t edit [name]", value="Allows you to replace an existing tags contents with a new text file. You can only do this if the tag has been set to public by the owner of the tag, or by a mod, or if you own the tag or are a mod. Type the response you would like to add (only one new response at a time can be added).", inline=False)
-	embed.add_field(name=".t edit [private / public / open]", value="Allows you to set a tag to public, private, or open, if you are the owner of the tag or a mod. Public tags can be edited by everyone, and private tags can only be edited by the creator and mods. Open tags can be edited by anyone and also deleted by anyone. Regardless of tag permissions, only the tags owner and mods can change the permissions of a tag.", inline=False)
-	embed.add_field(name=".t delete [name]", value="Allows you to delete a tag. If you are not the owner, or a mod, then this command will not work unless the tag permissions are set to open.", inline=False)
-	embed.add_field(name=".t list [name]", value="Lists all the responses to a tag. This command also lists the creator of the tag.", inline=False)
-	embed.add_field(name=".steffify [content]", value="The old steffify command! Will have Steffi hold up the letter in [content].", inline=False)
-	embed.add_field(name=".taglist", value="Sends a list of all created random tags.", inline=False)
+	embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	embed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+	embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+	embed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+	embed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+	embed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+	embed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+	embed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+	embed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+	embed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+	embed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+	embed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+	embed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+	embed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+	embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
 	await ctx.channel.send(embed=embed)
 
-client.run(os.getenv("TOKEN"))
+@client.command()
+async def get (ctx, typedef):
+	if typedef == "si" or typedef == "icon" or typedef == "servericon":
+		guild = ctx.message.guild
+		server_icon_url = guild.icon_url
+		await ctx.channel.send(f"Server Icon URL: {server_icon_url}")
+	elif typedef == "cc" or typedef == "chancount" or typedef == "channelcount":
+		guild = ctx.message.guild
+		textchancount = 0
+		textchancount = int(textchancount)
+		for channel in guild.text_channels:
+			textchancount = textchancount + 1
+		textchancount = str(textchancount)
+		catchancount = 0
+		catchancount = int(catchancount)
+		for catchannel in guild.categories:
+			catchancount = catchancount + 1
+		catchancount = str(catchancount)
+		voicechancount = 0
+		voicechancount = int(voicechancount)
+		for channel in guild.voice_channels:
+			voicechancount = voicechancount + 1
+		voicechancount = str(voicechancount)
+		await ctx.channel.send(f"The total number of text channels in this server is {textchancount}. \n The total number of voice channels in this server is {voicechancount}. \n The total number of channel categories in this server is {catchancount}.")
+	elif typedef == "av" or typedef == "avatar":
+		avatar_icon_url = ctx.author.avatar_url
+		await ctx.channel.send(f"Profile Picture / Avatar (Please note: this command will not call other peoples avatars, only yours.): {avatar_icon_url}")
+
+@client.command()
+async def guildlist(ctx):
+	serverlist = client.guilds
+	message = " "
+	for guild in serverlist:
+		message = message + f", {guild}"
+	await ctx.channel.send(message)
+
+@client.command()
+async def ocprompt(ctx, editnum=None, *, content=None):
+	if editnum == None:
+		themelist = open("ocprompt_1.txt").read().splitlines()
+		themechoice = random.choice(themelist)
+		colourlist = open("ocprompt_2.txt").read().splitlines()
+		colourchoice = random.choice(colourlist)
+		hairlist = open("ocprompt_3.txt").read().splitlines()
+		hairchoice = random.choice(hairlist)
+		weaponlist = open("ocprompt_4.txt").read().splitlines()
+		weaponchoice = random.choice(weaponlist)
+		extralist = open("ocprompt_5.txt").read().splitlines()
+		extrachoice = random.choice(extralist)
+
+		await ctx.channel.send(f"**OC PROMPT GENERATOR: Inspired by Hap's Twitter Magical Girl OC Prompt Game!** \n **THEME:** {themechoice}. \n **COLOUR:** {colourchoice}. \n **HAIR STYLE:** {hairchoice}. \n **WEAPON / POWER:** {weaponchoice}. \n **EXTRA RANDOM DETAIL:** {extrachoice}.")
+	elif editnum == "1": #THEME
+		if content == None:
+			await ctx.channel.send("Please specify what you would like to add to the prompt.")
+		else:
+			f = open("ocprompt_1.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the THEME category!")
+	elif editnum == "2": #MAIN COLOUR
+		if content == None:
+			await ctx.channel.send("Please specify what you would like to add to the prompt.")
+		else:
+			f = open("ocprompt_2.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the COLOUR category!")
+	elif editnum == "3": #HAIR STYLE
+		if content == None:
+			await ctx.channel.send("Please specify what you would like to add to the prompt.")
+		else:
+			f = open("ocprompt_3.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the HAIR STYLE category!")
+	elif editnum == "4": #WEAPON / POWERS
+		if content == None:
+			await ctx.channel.send("Please specify what you would like to add to the prompt.")
+		else:
+			f = open("ocprompt_4.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the WEAPON category!")
+	elif editnum == "5": #EXTRA
+		if content == None:
+			await ctx.channel.send("Please specify what you would like to add to the prompt.")
+		else:
+			f = open("ocprompt_5.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the EXTRA category!")
+	else:
+		themelist = open("ocprompt_1.txt").read().splitlines()
+		themecontent = " "
+		for i in themelist:
+			themecontent = themecontent + f"{i} | "
+		colourlist = open("ocprompt_2.txt").read().splitlines()
+		colourcontent = " "
+		for i in colourlist:
+			colourcontent = colourcontent + f"{i} | "
+		hairlist = open("ocprompt_3.txt").read().splitlines()
+		haircontent = " "
+		for i in hairlist:
+			haircontent = haircontent + f"{i} | "
+		weaponlist = open("ocprompt_4.txt").read().splitlines()
+		weaponcontent = " "
+		for i in weaponlist:
+			weaponcontent = weaponcontent + f"{i} | "
+		extralist = open("ocprompt_5.txt").read().splitlines()
+		extracontent = " "
+		for i in extralist:
+			extracontent = extracontent + f"{i} | "
+		embed=discord.Embed(title="Help: OCPROMPT", color=0xFFED70)
+		embed.add_field(name=".ocprompt `number` `content`", value="Replace `number` with one of the following in order to add `content` to this command!", inline=False)
+		embed.add_field(name="1", value=f"THEMES \n {themecontent}", inline=False)
+		embed.add_field(name="2", value=f"COLOURS \n {colourcontent}", inline=False)
+		embed.add_field(name="3", value=f"HAIR STYLES \n {haircontent}", inline=False)
+		embed.add_field(name="4", value=f"WEAPONS / POWERS \n {weaponcontent}", inline=False)
+		embed.add_field(name="5", value=f"EXTRA DETAILS \n {extracontent}", inline=False)
+		embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+		await ctx.channel.send(embed=embed)
+
+@client.command()
+async def emote(ctx, emoji: discord.Emoji):
+	await ctx.send(emoji.url)
+
+client.run(YOUR TOKEN HERE)
