@@ -1,6 +1,6 @@
 Goldie is a discord bot made for creating random tags using text files, amongst other things. They are written using discord.py, a python extension for Discord.
 
-This file will explain how Goldie works, along with a bit 
+This file will explain how Goldie works.
 ---
 To create random tags, just upload a text file and use the .t create [tagname] command to create a random tag. Then, whenever you use .t [tagname], the bot will pick a response at random from a line in the text file you uploaded. Remember to put each seperate response on a new line in the text file.
 There are three ways to edit tags:
