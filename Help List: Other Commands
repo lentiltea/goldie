@@ -1,0 +1,12 @@
+OTHER COMMANDS
+Various other commands!
+.steffify
+Replaced the old +t steffify command! Get Steffi to hold up a message!
+.ocprompt
+An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type .ocprompt help for more help.)
+.get [icon / avatar / cc]
+Lets you get the server icon, your avatar, or the channel count for the server!
+.emote [emoji]
+Gets the image file for an emote!
+.jail [user] [reason(optional)]
+Lets you put a user in jail. Replace user with free to release a user from jail.
