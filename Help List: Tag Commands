@@ -1,0 +1,18 @@
+TAG RELATED COMMANDS
+All commands related to tags.
+.t create [name]
+Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!
+.t edit [name] [content]
+Allows you to add one new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use add instead.
+.t edit [private / public / open]
+Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.
+.t add [name]
+Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!
+.t rewrite [name]
+Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.
+.t delete [name]
+Allows you to delete a tag completely.
+.t list [name]
+Sends a text file containing all the responses for a tag.
+.taglist
+Returns a list of all tags saved in the bot.
