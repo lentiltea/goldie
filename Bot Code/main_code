@@ -9,8 +9,10 @@ import asyncio
 from discord.ext import commands
 from discord.ext.commands import cooldown, BucketType
 from discord import permissions
+from discord_components import DiscordComponents, Button, ButtonStyle
 
 client = commands.Bot(command_prefix = ".")
+DiscordComponents(client)
 client.remove_command("help")
 
 #README
@@ -19,7 +21,7 @@ client.remove_command("help")
 #Remember to add to the help directory: there's one in .t and one in .help. EDIT BOTH
 
 rtagwithcreditslist = ["rsleep", "nicesleep"]
-banned_tag_names = ["delete", "create", "add", "steffify", "list", "help", "append", "rewrite", "edit", "eval", "ocprompt", "emote"]
+banned_tag_names = ["delete", "create", "add", "steffify", "list", "help", "append", "rewrite", "edit", "eval", "ocprompt", "emote", "jail", "dmhelp", "status", "eval"]
 
 async def melty_task():
 	while True:
@@ -314,6 +316,8 @@ private""")
 		await ctx.channel.send("That's a command! Use `.ocprompt` to call this command!")
 	elif name == "emote":
 		await ctx.channel.send("That's a command! Use `.emote` to call this command!")
+	elif name == "jail":
+		await ctx.channel.send("That's a command! Use `.jail` to call this command!")
 	elif name in rtagwithcreditslist:
 		linelist = open(f"{name}.txt").read().splitlines()
 		lineselector = len(linelist)
@@ -338,20 +342,43 @@ private""")
 		await ctx.channel.send(f"{rtag_author_number} \n {rtag_response}")
 	elif name == "help":
 		embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
-		embed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
-		embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
-		embed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
-		embed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
-		embed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
-		embed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
-		embed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
-		embed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
-		embed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
-		embed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
-		embed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
-		embed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+		embed.add_field(name="Help: Commands", value="Use the buttons attached to this message to navigate the help menu!", inline=False)
 		embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
-		await ctx.channel.send(embed=embed)
+		await ctx.send(
+			embed=embed,
+			components = [
+				[
+					Button(label="Tag Commands!"),
+					Button(label="Other Commands!")
+				]
+			]
+		)
+
+		tagembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+		tagembed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+		tagembed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+		tagembed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+		tagembed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+		tagembed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+		tagembed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+		tagembed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+		tagembed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+		tagembed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+		tagembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+		otherembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+		otherembed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+		otherembed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+		otherembed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+		otherembed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+		otherembed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
+		otherembed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+		otherembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+		interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Tag Commands!"))
+		await interaction.send(embed=tagembed)
+		interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Other Commands!"))
+		await interaction.send(embed=otherembed)
 	else:
 		if os.path.exists(f"{name}.txt") == True:
 			linelist = open(f"{name}.txt").read().splitlines()
@@ -378,14 +405,14 @@ async def steffify(ctx, *, messagecontent):
 	letter_list = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
 	for i in characterlist:
 		if i == " ":
-			i = " <:blank_tile:977218604347035678>"
-			returnmessage = returnmessage + f"{i}"
-			secondmessage = secondmessage + f"{i}"
+			i = "<:blank_tile:977218604347035678>"
+			returnmessage = returnmessage + f"{i} "
+			secondmessage = secondmessage + f"{i} "
 		elif i in letter_list:
 			i = f":regional_indicator_{i}:"
-			returnmessage = returnmessage + f"{i}"
-			secondmessage = secondmessage + "<:Steffi_wow:695122476795166780>"
-	await ctx.channel.send(f"{returnmessage} \n {secondmessage}")
+			returnmessage = returnmessage + f"{i} "
+			secondmessage = secondmessage + "<:Steffi_wow:695122476795166780> "
+	await ctx.channel.send(f"{returnmessage}\n{secondmessage}")
 
 @client.command()
 async def taglist(ctx):
@@ -398,21 +425,43 @@ async def taglist(ctx):
 @client.command()
 async def help(ctx):
 	embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
-	embed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
-	embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
-	embed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
-	embed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
-	embed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
-	embed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
-	embed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
-	embed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
-	embed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
-	embed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
-	embed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
-	embed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
-	embed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+	embed.add_field(name="Help: Commands", value="Use the buttons attached to this message to navigate the help menu! \n If the interact buttons don't work, you can use the command `.dmhelp` to have the bot DM you the help menu, or go to https://github.com/lentiltea/goldie to view the documentation, including the help details!", inline=False)
 	embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
-	await ctx.channel.send(embed=embed)
+	await ctx.send(
+		embed=embed,
+		components = [
+				[
+					Button(label="Tag Commands!"),
+					Button(label="Other Commands!")
+				]
+		]
+	)
+
+	tagembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	tagembed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+	tagembed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+	tagembed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+	tagembed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+	tagembed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+	tagembed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+	tagembed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+	tagembed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+	tagembed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+	tagembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+	otherembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	otherembed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+	otherembed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+	otherembed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+	otherembed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+	otherembed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
+	otherembed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	otherembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Tag Commands!"))
+	await interaction.send(embed=tagembed)
+	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Other Commands!"))
+	await interaction.send(embed=otherembed)
 
 @client.command()
 async def get (ctx, typedef):
@@ -537,7 +586,161 @@ async def ocprompt(ctx, editnum=None, *, content=None):
 		await ctx.channel.send(embed=embed)
 
 @client.command()
+async def jail(ctx, jailuser=None, *, jailreason=None):
+	if jailuser == None:
+		try:
+			jaillist = open("jail_log.txt").read().splitlines()
+			embed=discord.Embed(title="SD FANS COUNTY JAIL", color=0xFFED70)
+			jaillist2 = ""
+			entrynum = 0
+			for entry in jaillist:
+				entrynum = entrynum+1
+				jaillist2 = jaillist2 + f"{entrynum}: {entry} \n"
+			embed.add_field(name="The following people have been put into jail for committing the most heinous crimes:", value=f"{jaillist2}", inline=False)
+			embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+			await ctx.channel.send(embed=embed)
+		except:
+			await ctx.channel.send("No-one is currently in jail. Thank you for being lawful citizens!")
+	elif jailuser == "free":
+		if jailreason == None:
+			await ctx.channel.send("Please specify the number of the user you would like to free from jail. Check the current users by using `.jail`.")
+		else:
+			try:
+				jailreason = int(jailreason)
+				try:
+					jaillist = open("jail_log.txt").read().splitlines()
+					jailuserlist = open("jail_users.txt").read().splitlines()
+					jailreasonnum = jailreason - 1
+					jaillist2 = jaillist.pop(jailreasonnum)
+					jailuserlist2 = jailuserlist.pop(jailreasonnum)
+					jaillist3 = ""
+					for word in jaillist:
+						jaillist3 = jaillist3 + f"{word} \n"
+					jailuserlist3 = ""
+					for word in jailuserlist:
+						jailuserlist3 = jailuserlist3 + f"{word} \n"
+					f = open("jail_log.txt", "w")
+					f.write(jaillist3)
+					f.close()
+					f = open("jail_users.txt", "w")
+					f.write(jailuserlist3)
+					f.close()
+					await ctx.channel.send(f"Prisoner number {jailreason} has been released from jail.")
+				except:
+					await ctx.channel.send("The prisoner specified isn't in jail.")
+			except:
+				await ctx.channel.send("Please use the prisoner's number to release them. You can view this under `.jail` (it's the number they are in that list ^^.")
+	elif jailreason == None:
+		jailuserlower = jailuser.lower()
+		jailuserlist = open("jail_users.txt").read().splitlines()
+		jailuserchecker = 0
+		for entry in jailuserlist:
+			if entry == jailuserlower:
+				jailuserchecker = jailuserchecker + 1
+		if jailuserchecker != 0:
+			await ctx.channel.send("That user is already in jail! How criminal!")
+		else:
+			jailtime = datetime.datetime.now()
+			jailtime = jailtime.strftime("%m/%d/%Y, %H:%M")
+			jailentry = f"**{jailuser}**: {jailtime}."
+			f = open("jail_log.txt", "a")
+			f.write(f"{jailentry} \n")
+			f.close()
+			f = open("jail_users.txt", "a")
+			f.write(f"{jailuserlower} \n")
+			f.close()
+			await ctx.channel.send(f"{jailuser} has been put into jail!")
+	else:
+		jailuserlower = jailuser.lower()
+		jailuserlist = open("jail_users.txt").read().splitlines()
+		jailuserchecker = 0
+		for entry in jailuserlist:
+			if entry == jailuserlower:
+				jailuserchecker = jailuserchecker + 1
+		if jailuserchecker != 0:
+			await ctx.channel.send("That user is already in jail! How criminal!")
+		else:
+			jailtime = datetime.datetime.now()
+			jailtime = jailtime.strftime("%m/%d/%Y, %H:%M")
+			jailentry = f"**{jailuser}**: {jailtime}. FOUND GUILTY OF: {jailreason}"
+			f = open("jail_log.txt", "a")
+			f.write(f"{jailentry} \n")
+			f.close()
+			f = open("jail_users.txt", "a")
+			jailuser = jailuser.lower()
+			f.write(f"{jailuser} \n")
+			f.close()
+			await ctx.channel.send(f"{jailuser} has been put into jail! They were found guilty of: {jailreason}.")
+
+@client.command()
 async def emote(ctx, emoji: discord.Emoji):
 	await ctx.send(emoji.url)
+
+@client.command()
+async def testcomp(ctx):
+	embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	embed.add_field(name="Help: Commands", value="Use the buttons attached to this message to navigate the help menu! \n If the interact buttons don't work, you can use the command `.dmhelp` to have the bot DM you the help menu, or go to https://github.com/lentiltea/goldie to view the documentation, including the help details!", inline=False)
+	embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+	await ctx.send(
+		embed=embed,
+		components = [
+				[
+					Button(label="Tag Commands!"),
+					Button(label="Other Commands!")
+				]
+		]
+	)
+
+	tagembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	tagembed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+	tagembed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+	tagembed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+	tagembed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+	tagembed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+	tagembed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+	tagembed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+	tagembed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+	tagembed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+	tagembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+	otherembed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	otherembed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+	otherembed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+	otherembed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+	otherembed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+	otherembed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
+	otherembed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	otherembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+
+	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Tag Commands!"))
+	await interaction.send(embed=tagembed)
+	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Other Commands!"))
+	await interaction.send(embed=otherembed)
+
+@client.command()
+async def dmhelp(ctx):
+	author = ctx.message.author
+	embed=discord.Embed(title="Help: Goldie", color=0xFFED70)
+	embed.add_field(name="TAG RELATED COMMANDS", value="`All commands related to tags.`", inline=False)
+	embed.add_field(name=".t create [name]", value="Allows you to create a tag with the name [name]. To add tag content, attach a text file, with each different possible response to the tag on a seperate line. Please remember to put the credits to the tag with each entry too!", inline=False)
+	embed.add_field(name=".t edit [name] [content]", value="Allows you to add ***one*** new entry to a tag, using [content]. Replace [content] with what you would like to add. If you wish to add multiple new entries, please use `add` instead.", inline=False)
+	embed.add_field(name=".t edit [private / public / open]", value="Allows you to change the state of a tag. This action can only be carried out by moderators, or the owner of a tag. Private tags can only be edited, overwritten, and deleted by the tag owner and mods. Public tags can be edited by anyone, but can only be overwritten and deleted by the tag owner and mods. Open tags can be edited, overwritten, and deleted by anyone.", inline=False)
+	embed.add_field(name=".t add [name]", value="Allows you to append multiple new entries to a tag. Upload a text file with the new entries written on seperate lines, like you would when creating the tag, and use the add command!", inline=False)
+	embed.add_field(name=".t rewrite [name]", value="Allows you to completely overwrite a tag. This deletes the old content of the tag, and saves the attached text file as the tags new content.", inline=False)
+	embed.add_field(name=".t delete [name]", value="Allows you to delete a tag completely.", inline=False)
+	embed.add_field(name=".t list [name]", value="Sends a text file containing all the responses for a tag.", inline=False)
+	embed.add_field(name=".taglist", value="Returns a list of all tags saved in the bot.", inline=False)
+	embed.add_field(name="OTHER COMMANDS", value="`Various other commands!`", inline=False)
+	embed.add_field(name=".steffify", value="Replaced the old `+t steffify` command! Get Steffi to hold up a message!", inline=False)
+	embed.add_field(name=".ocprompt", value="An OC Twitter Prompt game inspired by Hap! Generate an OC prompt to draw! (Type `.ocprompt help` for more help.)", inline=False)
+	embed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
+	embed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
+	embed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+	await author.send(embed=embed)
+
+@client.command()
+async def status(ctx):
+	await ctx.channel.send(f"{len(client.guilds)} / {(round(1000 * client.latency))}")
 
 client.run(YOUR TOKEN HERE)
