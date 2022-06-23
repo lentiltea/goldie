@@ -10,3 +10,5 @@ Lets you get the server icon, your avatar, or the channel count for the server!
 Gets the image file for an emote!
 .jail [user] [reason(optional)]
 Lets you put a user in jail. Replace user with free to release a user from jail.
+.themegen"
+The themegen command! Type `.themegen help` for more help.
