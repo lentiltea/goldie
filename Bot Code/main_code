@@ -18,10 +18,10 @@ client.remove_command("help")
 #README
 #REMEMBER WHEN ADDING NEW COMMANDS TO DO THE FOLLOWING
 #Add command name to banned_tag_names if applicable
-#Remember to add to the help directory: there's one in .t and one in .help. EDIT BOTH
+#Remember to add to the help directory: there's one in .t and one in .help. Also add to dmhelp and to the github. EDIT ALL FOUR!
 
 rtagwithcreditslist = ["rsleep", "nicesleep"]
-banned_tag_names = ["delete", "create", "add", "steffify", "list", "help", "append", "rewrite", "edit", "eval", "ocprompt", "emote", "jail", "dmhelp", "status", "eval"]
+banned_tag_names = ["delete", "create", "add", "steffify", "list", "help", "append", "rewrite", "edit", "eval", "ocprompt", "emote", "jail", "dmhelp", "status", "eval", "themegen"]
 
 async def melty_task():
 	while True:
@@ -318,6 +318,8 @@ private""")
 		await ctx.channel.send("That's a command! Use `.emote` to call this command!")
 	elif name == "jail":
 		await ctx.channel.send("That's a command! Use `.jail` to call this command!")
+	elif name == "themegen":
+		await ctx.channel.send("That's a command! Use `.themegen` to call this command!")
 	elif name in rtagwithcreditslist:
 		linelist = open(f"{name}.txt").read().splitlines()
 		lineselector = len(linelist)
@@ -456,6 +458,7 @@ async def help(ctx):
 	otherembed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
 	otherembed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
 	otherembed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	embed.add_field(name=".themegen", value="The themegen command! Type `.themegen help` for more help.", inline=False)
 	otherembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
 
 	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Tag Commands!"))
@@ -710,6 +713,7 @@ async def testcomp(ctx):
 	otherembed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
 	otherembed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
 	otherembed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	embed.add_field(name=".themegen", value="The themegen command! Type `.themegen help` for more help.", inline=False)
 	otherembed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
 
 	interaction = await client.wait_for("button_click", check = lambda i: i.component.label.startswith("Tag Commands!"))
@@ -736,8 +740,59 @@ async def dmhelp(ctx):
 	embed.add_field(name=".get [icon / avatar / cc]", value="Lets you get the server icon, your avatar, or the channel count for the server!", inline=False)
 	embed.add_field(name=".emote [emoji]", value="Gets the image file for an emote!", inline=False)
 	embed.add_field(name=".jail [user] [reason(optional)]", value="Lets you put a user in jail. Replace user with `free` to release a user from jail.", inline=False)
+	embed.add_field(name=".themegen", value="The themegen command! Type `.themegen help` for more help.", inline=False)
 	embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
 	await author.send(embed=embed)
+
+@client.command()
+async def themegen(ctx, type=None, *, content=None):
+	if type == None:
+		colourlist = open("themegen_1.txt").read().splitlines()
+		everythingelselist = open("themegen_2.txt").read().splitlines()
+		colourchoice = random.choice(colourlist)
+		everythingchoice1 = random.choice(everythingelselist)
+		everythingchoice2 = random.choice(everythingelselist)
+		nodupefactor = 0
+		while nodupefactor == 0:
+			if everythingchoice1 == everythingchoice2:
+				everythingchoice2 = random.choice(everythingelselist)
+			else:
+				nodupefactor = 1
+		await ctx.channel.send(f"I think I'll choose **{colourchoice}**, **{everythingchoice1}**, and **{everythingchoice2}**")
+	elif type == "1":
+		if content == None:
+			await ctx.channel.send("Please specify what you wish to add.")
+		else:
+			f = open("themegen_1.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the COLOURS category!")
+	elif type == "2":
+		if content == None:
+			await ctx.channel.send("Please specify what you wish to add.")
+		else:
+			f = open("themegen_2.txt", "a")
+			f.write(f"\n {content}")
+			f.close()
+			await ctx.channel.send("Content added to the EVERYTHING ELSE category!")
+	elif type == "help":
+		colourlist = open("themegen_1.txt").read().splitlines()
+		colourcontent = " "
+		for i in colourlist:
+			colourcontent = colourcontent + f"{i} | "
+		everythinglist = open("themegen_2.txt").read().splitlines()
+		everythingcontent = " "
+		for i in everythinglist:
+			everythingcontent = everythingcontent + f"{i} | "
+		embed=discord.Embed(title="Help: THEMEGEN", color=0xFFED70)
+		embed.add_field(name=".themegen `number` `content`", value="Replace `number` with one of the following in order to add `content` to this command!", inline=False)
+		embed.add_field(name="1", value=f"COLOURS \n {colourcontent}", inline=False)
+		embed.add_field(name="2", value=f"EVERYTHING ELSE \n {everythingcontent}", inline=False)
+		embed.set_footer(text="Have an issue? Need some help that isn't listed? Have a request for a new feature? Ping LentilTea#4801 for help!", icon_url=f"{client.user.avatar_url}")
+		await ctx.channel.send(embed=embed)
+	else:
+		await ctx.channel.send("Please specify a valid directory to add to. (1 = colours, 2 = everything else).")
+
 
 @client.command()
 async def status(ctx):
